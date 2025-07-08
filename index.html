@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Rhyzoe Daily Tips 💸</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #111;
+      color: #fefefe;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    h1 {
+      color: #f5428d;
+      margin-bottom: 0;
+    }
+
+    .job {
+      font-size: 0.95rem;
+      color: #ccc;
+      margin-top: 0.2rem;
+      margin-bottom: 2rem;
+    }
+
+    input[type="number"],
+    input[type="date"] {
+      padding: 0.6rem;
+      font-size: 1.1rem;
+      margin: 0.3rem;
+      width: 180px;
+      border-radius: 8px;
+      border: none;
+    }
+
+    button {
+      background: #f5428d;
+      color: white;
+      border: none;
+      padding: 0.6rem 1rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #ff79b0;
+    }
+
+    .log {
+      margin-top: 2rem;
+      text-align: left;
+      max-width: 420px;
+      margin-left: auto;
+      margin-right: auto;
+      background: #1a1a1a;
+      padding: 1rem;
+      border-radius: 10px;
+    }
+
+    .log-item {
+      border-bottom: 1px solid #333;
+      padding: 0.5rem 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>💰 Rhyzoe Daily Tips</h1>
+  <div class="job">Bartender @ The Lobby Bar, Thailand 🇹🇭 (THB)</div>
+
+  <input type="date" id="dateInput">
+  <input type="number" id="tipInput" placeholder="Amount (THB)">
+  <br>
+  <button onclick="saveTip()">💾 Save Tip</button>
+
+  <div class="log" id="tipLog">
+    <h3>📅 Tip History</h3>
+  </div>
+
+  <script>
+    const tipInput = document.getElementById('tipInput');
+    const dateInput = document.getElementById('dateInput');
+    const tipLog = document.getElementById('tipLog');
+
+    function formatDate(input) {
+      const parts = input.split("-");
+      return `${parts[2]}.${parts[1]}.${parts[0]}`; // dd.mm.yyyy
+    }
+
+    function saveTip() {
+      const tipAmount = tipInput.value || "0";
+      const date = dateInput.value;
+
+      if (date) {
+        const formattedDate = formatDate(date);
+        localStorage.setItem(`tip-${formattedDate}`, tipAmount);
+        tipInput.value = '';
+        loadTips();
+      } else {
+        alert("Select a date first!");
+      }
+    }
+
+    function loadTips() {
+      tipLog.innerHTML = '<h3>📅 Tip History</h3>';
+      const tips = [];
+
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith('tip-')) {
+          const date = key.replace('tip-', '');
+          const amount = localStorage.getItem(key);
+          tips.push({ date, amount });
+        }
+      }
+
+      // Sort by date descending
+      tips.sort((a, b) => {
+        const da = a.date.split('.').reverse().join('-');
+        const db = b.date.split('.').reverse().join('-');
+        return db.localeCompare(da);
+      });
+
+      tips.forEach(tip => {
+        const div = document.createElement('div');
+        div.className = 'log-item';
+        div.textContent = `${tip.date} → ${tip.amount} THB`;
+        tipLog.appendChild(div);
+      });
+    }
+
+    // Auto-fill today's date
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.value = today;
+
+    loadTips();
+  </script>
+</body>
+</html>
