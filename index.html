@@ -81,6 +81,34 @@
   </div>
 
   <script>
+
+    function loadTips() {
+  tipLog.innerHTML = '<h3>📅 Tip History</h3>';
+  const tips = [];
+
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith('tip-')) {
+      const date = key.replace('tip-', '');
+      const amount = localStorage.getItem(key);
+      tips.push({ date, amount });
+    }
+  }
+
+  // ✅ Sort by date ASCENDING
+  tips.sort((a, b) => {
+    const da = a.date.split('.').reverse().join('-');
+    const db = b.date.split('.').reverse().join('-');
+    return da.localeCompare(db);
+  });
+
+  tips.forEach(tip => {
+    const div = document.createElement('div');
+    div.className = 'log-item';
+    div.textContent = `${tip.date} → ${tip.amount} THB`;
+    tipLog.appendChild(div);
+  });
+}
     const tipInput = document.getElementById('tipInput');
     const dateInput = document.getElementById('dateInput');
     const tipLog = document.getElementById('tipLog');
