@@ -53,7 +53,7 @@
     .log {
       margin-top: 2rem;
       text-align: left;
-      max-width: 420px;
+      max-width: 460px;
       margin-left: auto;
       margin-right: auto;
       background: #1a1a1a;
@@ -64,6 +64,28 @@
     .log-item {
       border-bottom: 1px solid #333;
       padding: 0.5rem 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .log-text {
+      flex-grow: 1;
+    }
+
+    .action-btn {
+      margin-left: 6px;
+      font-size: 0.85rem;
+      padding: 0.3rem 0.6rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      background-color: #444;
+      color: white;
+    }
+
+    .action-btn:hover {
+      background-color: #666;
     }
   </style>
 </head>
@@ -81,34 +103,6 @@
   </div>
 
   <script>
-
-    function loadTips() {
-  tipLog.innerHTML = '<h3>📅 Tip History</h3>';
-  const tips = [];
-
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key.startsWith('tip-')) {
-      const date = key.replace('tip-', '');
-      const amount = localStorage.getItem(key);
-      tips.push({ date, amount });
-    }
-  }
-
-  // ✅ Sort by date ASCENDING
-  tips.sort((a, b) => {
-    const da = a.date.split('.').reverse().join('-');
-    const db = b.date.split('.').reverse().join('-');
-    return da.localeCompare(db);
-  });
-
-  tips.forEach(tip => {
-    const div = document.createElement('div');
-    div.className = 'log-item';
-    div.textContent = `${tip.date} → ${tip.amount} THB`;
-    tipLog.appendChild(div);
-  });
-}
     const tipInput = document.getElementById('tipInput');
     const dateInput = document.getElementById('dateInput');
     const tipLog = document.getElementById('tipLog');
@@ -124,7 +118,7 @@
 
       if (date) {
         const formattedDate = formatDate(date);
-        localStorage.setItem(`tip-${formattedDate}`, tipAmount);
+        localStorage.setItem(`tip-${formattedDate}`, tipAmount.trim());
         tipInput.value = '';
         loadTips();
       } else {
@@ -145,25 +139,63 @@
         }
       }
 
-      // Sort by date descending
+      // Sort ASC (oldest first)
       tips.sort((a, b) => {
-  const da = a.date.split('.').reverse().join('-');
-  const db = b.date.split('.').reverse().join('-');
-  return da.localeCompare(db); // ASCENDING
-});
+        const daParts = a.date.split('.');
+        const dbParts = b.date.split('.');
+        const da = `${daParts[2]}-${daParts[1]}-${daParts[0]}`;
+        const db = `${dbParts[2]}-${dbParts[1]}-${dbParts[0]}`;
+        return da.localeCompare(db);
+      });
 
       tips.forEach(tip => {
         const div = document.createElement('div');
         div.className = 'log-item';
-        div.textContent = `${tip.date} → ${tip.amount} THB`;
+
+        const span = document.createElement('span');
+        span.className = 'log-text';
+        span.textContent = `${tip.date} → ${tip.amount} THB`;
+
+        const editBtn = document.createElement('button');
+        editBtn.textContent = '🖊️';
+        editBtn.className = 'action-btn';
+        editBtn.onclick = () => editTip(tip.date);
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = '🗑️';
+        deleteBtn.className = 'action-btn';
+        deleteBtn.onclick = () => deleteTip(tip.date);
+
+        div.appendChild(span);
+        div.appendChild(editBtn);
+        div.appendChild(deleteBtn);
+
         tipLog.appendChild(div);
       });
     }
 
-    // Auto-fill today's date
+    function editTip(date) {
+      const current = localStorage.getItem(`tip-${date}`);
+      const newAmount = prompt(`Edit tip for ${date}`, current);
+      if (newAmount !== null && newAmount.trim() !== '') {
+        localStorage.setItem(`tip-${date}`, newAmount.trim());
+        loadTips();
+      }
+    }
+
+    function deleteTip(date) {
+      const confirmed = confirm(`Delete tip for ${date}?`);
+      if (confirmed) {
+        localStorage.removeItem(`tip-${date}`);
+        loadTips();
+      }
+    }
+
+    // Set today's date as default
     const today = new Date().toISOString().split('T')[0];
     dateInput.value = today;
 
+    // Initial load
     loadTips();
   </script>
 </body>
