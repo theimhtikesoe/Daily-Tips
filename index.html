@@ -147,10 +147,10 @@
 
       // Sort by date descending
       tips.sort((a, b) => {
-        const da = a.date.split('.').reverse().join('-');
-        const db = b.date.split('.').reverse().join('-');
-        return db.localeCompare(da);
-      });
+  const da = a.date.split('.').reverse().join('-');
+  const db = b.date.split('.').reverse().join('-');
+  return da.localeCompare(db); // ASCENDING
+});
 
       tips.forEach(tip => {
         const div = document.createElement('div');
